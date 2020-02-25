@@ -32,6 +32,7 @@ stream.getChanges( /*string*/ slotName, /*string*/ uptoLsn, /*object*/ option, /
 	- ```standbyMessageTimeout``` : maximum seconds between keepalive messages (default: 10) 
     - ```includeXids``` : bool (default: false)
     - ```includeTimestamp``` : bool (default: false)
+	- ```explicitAck``` : bool (default: false)
 	- ```queryOptions``` : object containing decoder specific options (optional)
 		- ```'include-types': false```
 		- ```'filter-tables': 'foo.bar'```
@@ -53,6 +54,12 @@ stream.on('data', (/*object*/ msg)=>{/*...*/});
 - Raised when error or disconnected.
 ```javascript
 stream.on('error', (/*object*/ err)=>{/*...*/});
+```
+
+### 3-5. Method - Stream.acknowledge
+- Acknowledge the given lsn value. Required only if explicitAck was set to true.
+```javascript
+stream.emit('acknowledge', { /*string*/ lsn });
 ```
 
 ## 4. Plugin

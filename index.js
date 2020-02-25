@@ -130,8 +130,10 @@ var LogicalReplication = function(config) {
 							lsn,
 							log: msg.chunk.slice(25),
 						});
-						self.emit('acknowledge', { lsn });
-						lastLsn = lsn;
+						
+						if (!option.explicitAck) {
+							self.emit('acknowledge', { lsn });
+						}
 					} else if (msg.chunk[0] == 0x6b) { // Primary keepalive message
 						var lsn = (msg.chunk.readUInt32BE(1).toString(16).toUpperCase()) + '/' + (msg.chunk.readUInt32BE(5).toString(16).toUpperCase());
 						var timestamp = Math.floor(msg.chunk.readUInt32BE(9) * 4294967.296 + msg.chunk.readUInt32BE(13) / 1000 + 946080000000);
@@ -141,7 +143,10 @@ var LogicalReplication = function(config) {
 							timestamp,
 							shouldRespond
 						});
-						lastLsn = lsn;
+						if (!option.explicitAck) {
+							// Not sure if this is usefull at all
+							lastLsn = lsn;
+						}
 					} else {
 						console.log('Unknown message', msg.chunk[0]);
 					}
@@ -158,6 +163,7 @@ var LogicalReplication = function(config) {
 		var lsn = msg.lsn.split('/');
 		standbyStatusUpdate(client, parseInt(lsn[0], 16), parseInt(lsn[1], 16), 'acknowledge');
 		updateLastStatus();
+		lastLsn = msg.lsn;
 	}
 
 	function startStandbyTimeoutCheck() {
